@@ -31,34 +31,25 @@ app.set('port', (process.env.PORT || 5000));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-    res.send('Hello world, I am a chat bot');
-});
-
 app.post('/webhook/', (req, res) => {
-    
-    // if(req.headers['x-hub-signature'] && utils.verifyRequest(req)) {
+    if(req.headers['x-hub-signature'] && utils.verifyRequest(req)) {
         var funcName = "beautify_" + req.headers['x-github-event'];
         beautify(funcName, req.body, (err, message) => {
             if(err) {
                 res.status(400).send(err.message);
             }
-            res.status(200).send(message);
+            gitbot.sendMessage(message);
         });
-    // } else {
-        // res.status(400).send("Invalid signature\n");
-    // }
+    } else {
+        res.status(400).send("Invalid signature\n");
+    }
 });
 
-app.listen(app.get('port'), () => {
-    console.log('running on port', app.get('port'));
-});
-
-// gitbot
-//     .setup()
-//     .then(
-//         () => app.listen(app.get('port'), () => {
-//             console.log('running on port', app.get('port'));
-//         })
-//     )
-//     .catch((err) => console.log(err.message));
+gitbot
+    .setup()
+    .then(
+        () => app.listen(app.get('port'), () => {
+            console.log('running on port', app.get('port'));
+        })
+    )
+    .catch((err) => console.log(err.message));
